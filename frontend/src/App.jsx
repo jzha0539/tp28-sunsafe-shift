@@ -1,13 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sun, Shield, Shirt, Bell, MapPin, AlertTriangle, BarChart3 } from "lucide-react";
 
-const uvSamples = {
-  Melbourne: 9,
-  Geelong: 8,
-  Bendigo: 10,
-  Ballarat: 7,
-  Gippsland: 9,
-};
+const cityOptions = ["Melbourne", "Geelong", "Bendigo", "Ballarat", "Gippsland"];
 
 const uvLevels = [
   { label: "Low", range: "0–2", advice: "Basic protection is usually enough. Sunglasses are still recommended outdoors.", minutes: "about 60+ minutes" },
@@ -17,26 +11,7 @@ const uvLevels = [
   { label: "Extreme", range: "11+", advice: "Avoid prolonged outdoor exposure and use maximum protection immediately.", minutes: "within about 10 minutes" },
 ];
 
-const myths = [
-  { myth: "You do not need sunscreen on cloudy days", fact: "UVA can still pass through clouds, so skin damage can still accumulate." },
-  { myth: "People with darker skin cannot be harmed by UV", fact: "Different skin tones experience different levels of risk, but everyone can be affected by UV exposure." },
-  { myth: "A high SPF number is all that matters", fact: "Protection also depends on broad-spectrum coverage, application amount, reapplication, and protective clothing." },
-];
 
-const skinProfiles = {
-  fair: {
-    title: "Fair skin tone",
-    text: "Fairer skin can burn more quickly and often needs stronger protection during high UV periods.",
-  },
-  medium: {
-    title: "Medium skin tone",
-    text: "Medium skin may not burn as fast, but long-term UV exposure can still cause pigmentation and skin damage.",
-  },
-  deep: {
-    title: "Deep skin tone",
-    text: "Deeper skin tones may have a lower risk of immediate sunburn, but UVA-related ageing and long-term damage are still important concerns.",
-  },
-};
 
 function getUvMeta(uv) {
   if (uv <= 2) return { label: "Low", tone: "text-emerald-600", bg: "bg-emerald-50", ring: "ring-emerald-100" };
@@ -64,12 +39,66 @@ function getClothing(uv) {
 
 export default function SunscreenWebsite() {
   const [city, setCity] = useState("Melbourne");
-  const [skinTone, setSkinTone] = useState("medium");
-  const [reminder, setReminder] = useState(120);
+const [skinTone, setSkinTone] = useState("medium");
+const [reminder, setReminder] = useState(120);
 
-  const uv = uvSamples[city];
-  const uvMeta = useMemo(() => getUvMeta(uv), [uv]);
-  const profile = skinProfiles[skinTone];
+const [uvData, setUvData] = useState({
+  city: "Melbourne",
+  uv: 9,
+  level: "Very High",
+  damageTime: "about 12–20 minutes",
+});
+
+const [myths, setMyths] = useState([]);
+const [profile, setProfile] = useState({
+  title: "Medium skin tone",
+  text: "Medium skin may not burn as fast, but long-term UV exposure can still cause pigmentation and skin damage.",
+});
+
+const uv = uvData.uv;
+const uvMeta = useMemo(() => getUvMeta(uv), [uv]);
+
+useEffect(() => {
+  async function fetchUvData() {
+    try {
+      const response = await fetch(`http://127.0.0.1:5050/api/uv?city=${city}`);
+      const data = await response.json();
+      setUvData(data);
+    } catch (error) {
+      console.error("Failed to fetch UV data:", error);
+    }
+  }
+
+  fetchUvData();
+}, [city]);
+
+useEffect(() => {
+  async function fetchMyths() {
+    try {
+      const response = await fetch("http://127.0.0.1:5050/api/myths");
+      const data = await response.json();
+      setMyths(data);
+    } catch (error) {
+      console.error("Failed to fetch myths:", error);
+    }
+  }
+
+  fetchMyths();
+}, []);
+
+useEffect(() => {
+  async function fetchSkinProfile() {
+    try {
+      const response = await fetch(`http://127.0.0.1:5050/api/skin-profile?tone=${skinTone}`);
+      const data = await response.json();
+      setProfile(data);
+    } catch (error) {
+      console.error("Failed to fetch skin profile:", error);
+    }
+  }
+
+  fetchSkinProfile();
+}, [skinTone]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-yellow-50 text-slate-800">
@@ -154,7 +183,7 @@ export default function SunscreenWebsite() {
                 onChange={(e) => setCity(e.target.value)}
                 className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none"
               >
-                {Object.keys(uvSamples).map((item) => (
+                {cityOptions.map((item) => (
                   <option key={item} value={item}>{item}</option>
                 ))}
               </select>
@@ -170,9 +199,16 @@ export default function SunscreenWebsite() {
                   {uvMeta.label}
                 </div>
               </div>
-              <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-slate-700">
-                <AlertTriangle className="mt-0.5 h-4 w-4 text-orange-500" />
-                Human alert: UV in <strong>{city}</strong> is currently <strong>{uvMeta.label}</strong>. Skin may begin to experience damage in <strong>{uvLevels.find((x) => x.label === uvMeta.label)?.minutes || "a short period"}</strong>, so sunscreen, shade, and protective clothing are recommended now.
+              <p className="mt-5 text-sm leading-7 text-slate-700">
+               <span className="inline-flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                  <span>
+                    Human alert: UV in <strong>{uvData.city}</strong> is currently{" "}
+                  <strong>{uvData.level}</strong>. Skin may begin to experience damage in{" "}
+                  <strong>{uvData.damageTime}</strong>, so sunscreen, shade, and protective
+                    clothing are recommended now.
+                  </span>
+                </span>
               </p>
             </div>
           </div>
