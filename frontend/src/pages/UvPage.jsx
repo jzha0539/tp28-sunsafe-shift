@@ -12,9 +12,10 @@ export default function UvPage({ page, setPage }) {
     city: "Melbourne",
     uv: 5.2,
     level: "Moderate",
-    damageTime: "about 35–45 minutes",
+    damageTime: "about 35-45 minutes",
   });
-  
+  const [loadingLocation, setLoadingLocation] = useState(false);
+
   useEffect(() => {
     async function fetchUvData() {
       try {
@@ -22,15 +23,53 @@ export default function UvPage({ page, setPage }) {
         const data = await res.json();
         if (!data.error) {
           setUvData(data);
+          localStorage.setItem("currentUvData", JSON.stringify(data));
         }
       } catch (error) {
         console.error("UV fetch failed", error);
       }
     }
-  
+
     fetchUvData();
   }, [city]);
 
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setLoadingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        try {
+          const res = await fetch(
+            `${API_BASE_URL}/api/uv-by-coords?lat=${lat}&lon=${lon}`
+          );
+          const data = await res.json();
+
+          if (!data.error) {
+            setUvData(data);
+            localStorage.setItem("currentUvData", JSON.stringify(data));
+          }
+        } catch (error) {
+          console.error("Current location UV fetch failed", error);
+          alert("Unable to fetch UV for your current location.");
+        } finally {
+          setLoadingLocation(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error", error);
+        alert("Unable to get your current location.");
+        setLoadingLocation(false);
+      }
+    );
+  };
 
   const badgeClass =
     uvLabelClass[uvData.level] ||
@@ -45,7 +84,7 @@ export default function UvPage({ page, setPage }) {
           <div className="grid gap-8 lg:grid-cols-[.95fr_1.05fr]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-600">
-                US1.1 Localised UV Alert
+                Localised UV Alert
               </p>
               <h2 className="mt-3 text-4xl font-semibold text-slate-900 sm:text-5xl">
                 Track UV Levels
@@ -73,14 +112,22 @@ export default function UvPage({ page, setPage }) {
                     ))}
                   </select>
 
-                  <button className="flex w-20 items-center justify-center bg-slate-900 text-white">
+                  <button
+                    type="button"
+                    className="flex w-20 items-center justify-center bg-slate-900 text-white"
+                  >
                     <Search className="h-5 w-5" />
                   </button>
                 </div>
 
-                <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-sky-600 px-5 py-4 text-base font-medium text-white transition hover:bg-sky-700">
+                <button
+                  type="button"
+                  onClick={handleUseCurrentLocation}
+                  disabled={loadingLocation}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-sky-600 px-5 py-4 text-base font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70"
+                >
                   <MapPin className="h-5 w-5" />
-                  Use current location
+                  {loadingLocation ? "Detecting current location..." : "Use current location"}
                 </button>
               </div>
             </div>

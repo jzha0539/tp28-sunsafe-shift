@@ -13,7 +13,7 @@ export default function ProtectionPage({ page, setPage }) {
     city: "Melbourne",
     uv: 5.2,
     level: "Moderate",
-    damageTime: "about 35–45 minutes",
+    damageTime: "about 35-45 minutes",
   });
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function ProtectionPage({ page, setPage }) {
       <main className="mx-auto max-w-6xl px-6 pb-28 pt-10">
         <SectionCard className="p-6 sm:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
-            US3 Practical Protection Guidance
+            Practical Protection Guidance
           </p>
 
           <h2 className="mt-3 text-4xl font-semibold text-slate-900 sm:text-5xl">
@@ -63,7 +63,7 @@ export default function ProtectionPage({ page, setPage }) {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-slate-900">
-                    US3.1 Sunscreen Dosage
+                    Sunscreen Dosage
                   </h3>
                   <p className="text-sm text-slate-500">
                     Based on current UV level
@@ -106,7 +106,7 @@ export default function ProtectionPage({ page, setPage }) {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-slate-900">
-                    US3.2 Reapplication Reminder
+                    Reapplication Reminder
                   </h3>
                   <p className="text-sm text-slate-500">
                     Set a sunscreen reminder interval
@@ -144,7 +144,7 @@ export default function ProtectionPage({ page, setPage }) {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-slate-900">
-                    US3.3 Clothing Advice
+                    Clothing Advice
                   </h3>
                   <p className="text-sm text-slate-500">
                     Recommended by UV risk level
