@@ -51,9 +51,9 @@ function getUvLevel(uv) {
 
 function getDamageTime(level) {
   if (level === "Low") return "about 60+ minutes";
-  if (level === "Moderate") return "about 35–45 minutes";
-  if (level === "High") return "about 20–30 minutes";
-  if (level === "Very High") return "about 12–20 minutes";
+  if (level === "Moderate") return "about 35-45 minutes";
+  if (level === "High") return "about 20-30 minutes";
+  if (level === "Very High") return "about 12-20 minutes";
   return "within about 10 minutes";
 }
 
