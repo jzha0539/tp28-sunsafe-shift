@@ -45,3 +45,17 @@ export const uvLabelClass = {
     if (level === "Very High") return ["Wide-brim hat", "Long sleeves", "Dense fabric or UPF clothing"];
     return ["UPF clothing", "Wide-brim hat", "Covered shoulders and arms"];
   }
+
+  export function formatUvDisplay(uv) {
+  if (uv === 0) {
+    return {
+      label: "No significant UV right now",
+      risk: "Low immediate risk",
+    };
+  }
+
+  return {
+    label: `${uv}`,
+    risk: null,
+  };
+}

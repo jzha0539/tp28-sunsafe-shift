@@ -85,7 +85,7 @@ export default function AwarenessPage({ page, setPage }) {
 
           <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
             Explore simple visual summaries about UV behaviour, common
-            misconceptions, and seasonal trend patterns.
+            misconceptions, and Melbourne monthly UV trend patterns.
           </p>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -145,7 +145,7 @@ export default function AwarenessPage({ page, setPage }) {
                 </div>
                 <div>
                   <h3 className="text-2xl font-semibold text-slate-900">
-                    Seasonal UV trend
+                    Melbourne monthly UV climatology
                   </h3>
                   <p className="text-sm text-slate-500">
                     Loaded from database
@@ -153,29 +153,31 @@ export default function AwarenessPage({ page, setPage }) {
                 </div>
               </div>
 
-              <div className="mt-8 flex h-56 items-end gap-4 rounded-3xl bg-slate-50 p-5">
-                {trendData.length > 0 ? (
-                  trendData.map((item, index) => (
-                    <div
-                      key={`${item.label}-${index}`}
-                      className="flex flex-1 flex-col items-center justify-end gap-3"
-                    >
+              <div className="mt-8 overflow-x-auto rounded-3xl bg-slate-50 p-5">
+                <div className="flex h-56 min-w-max items-end gap-4">
+                  {trendData.length > 0 ? (
+                    trendData.map((item, index) => (
                       <div
-                        className="w-full rounded-t-2xl bg-gradient-to-t from-sky-500 to-cyan-300"
-                        style={{
-                          height: `${Math.max((item.value / maxTrendValue) * 180, 12)}px`,
-                        }}
-                      />
-                      <div className="text-center text-xs font-medium text-slate-500">
-                        {item.label}
+                        key={`${item.label}-${index}`}
+                        className="flex w-12 flex-col items-center justify-end gap-3"
+                      >
+                        <div
+                          className="w-6 rounded-t-2xl bg-gradient-to-t from-sky-500 to-cyan-300"
+                          style={{
+                            height: `${Math.max((item.value / maxTrendValue) * 180, 12)}px`,
+                          }}
+                        />
+                        <div className="text-center text-xs font-medium text-slate-500">
+                          {item.label}
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm text-slate-500">
+                      No trend data available.
                     </div>
-                  ))
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm text-slate-500">
-                    No trend data available.
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
