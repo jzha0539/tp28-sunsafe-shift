@@ -81,6 +81,34 @@ async function getCurrentUv(latitude, longitude) {
   return uv;
 }
 
+async function getTodayUvTrend(latitude, longitude) {
+  const response = await axios.get(
+    "https://air-quality-api.open-meteo.com/v1/air-quality",
+    {
+      params: {
+        latitude,
+        longitude,
+        hourly: "uv_index",
+        timezone: "auto",
+      },
+    }
+  );
+
+  const times = response.data?.hourly?.time || [];
+  const uvValues = response.data?.hourly?.uv_index || [];
+
+  if (!times.length || !uvValues.length) {
+    throw new Error("Hourly UV trend not found in API response");
+  }
+
+  const trend = times.map((time, index) => ({
+    time,
+    uv: uvValues[index],
+  }));
+
+  return trend;
+}
+
 app.get("/", (req, res) => {
   res.send("TP28 backend is running");
 });
@@ -109,6 +137,53 @@ app.get("/api/uv", async (req, res) => {
 
     res.status(500).json({
       error: "Failed to fetch UV data",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/api/uv-today", async (req, res) => {
+  try {
+    const city = req.query.city || "Melbourne";
+
+    const location = await getCoordinates(city);
+    const trend = await getTodayUvTrend(location.latitude, location.longitude);
+
+    res.json({
+      city: location.name,
+      country: location.country,
+      trend,
+    });
+  } catch (error) {
+    console.error("Failed to fetch today UV trend:", error.message);
+
+    res.status(500).json({
+      error: "Failed to fetch today UV trend",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/api/uv-today-by-coords", async (req, res) => {
+  try {
+    const lat = Number(req.query.lat);
+    const lon = Number(req.query.lon);
+
+    if (Number.isNaN(lat) || Number.isNaN(lon)) {
+      return res.status(400).json({ error: "Invalid latitude or longitude" });
+    }
+
+    const trend = await getTodayUvTrend(lat, lon);
+
+    res.json({
+      city: "Current Location",
+      trend,
+    });
+  } catch (error) {
+    console.error("Failed to fetch UV trend by coordinates:", error.message);
+
+    res.status(500).json({
+      error: "Failed to fetch UV trend by coordinates",
       details: error.message,
     });
   }
